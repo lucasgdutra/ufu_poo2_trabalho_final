@@ -4,6 +4,7 @@ public class UsuarioForm {
     private Long id;
     private String nome;
     private String email;
+    private String senha;
     private String tipoUsuario; // This field represents the type of user: Estudante, Professor, or
                                 // Administrador
 
@@ -38,6 +39,14 @@ public class UsuarioForm {
 
     public void setTipoUsuario(String tipoUsuario) {
         this.tipoUsuario = tipoUsuario;
+    }
+
+    public String getSenha() {
+        return this.senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 
 }
