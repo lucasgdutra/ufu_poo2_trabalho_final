@@ -13,6 +13,7 @@
 
     <nav th:replace="~{fragments :: navbar}"></nav>
     <div class="container mt-3">
+        <p th:text="${message}" th:if="${message}" class="alert alert-info">Message goes here</p>
         <h2 class="mt-5">Lista de usuarios</h2>
 
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalUsuarios">
