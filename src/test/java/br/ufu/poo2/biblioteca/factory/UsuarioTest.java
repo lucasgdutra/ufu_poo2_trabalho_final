@@ -4,34 +4,42 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import br.ufu.poo2.biblioteca.model.Usuario;
+import br.ufu.poo2.biblioteca.model.UsuarioAdministrador;
+import br.ufu.poo2.biblioteca.model.UsuarioEstudante;
+import br.ufu.poo2.biblioteca.model.UsuarioProfessor;
+
 class UsuarioTest {
 
     @Test
     public void testCriarEditarExcluirProfessor() {
         FabricaDeUsuarios fabricaProfessor = new FabricanteProfessor();
-        Usuario professor = fabricaProfessor.criarUsuario("John Doe", "john.doe@example.com", "54ff4", 8975);
+        Usuario professor = fabricaProfessor.criarUsuario("John Doe", "john.doe@example.com", "54ff4");
 
-        assertEquals("Professor", professor.getTipo());
+        assertEquals("John Doe", professor.getNome());
+        assertEquals("john.doe@example.com", professor.getEmail());
+        assertTrue(professor instanceof UsuarioProfessor);
 
-        professor.editar("John Smith", "john.smith@example.com", "119bsi290", 123456);
-        assertEquals("John Smith", ((UsuarioProfessor) professor).getNome());
-        assertEquals("john.smith@example.com", ((UsuarioProfessor) professor).getEmail());
-
-        professor.excluir("john.smith@example.com");
     }
 
     @Test
     public void testCriarEditarExcluirAluno() {
         FabricaDeUsuarios fabricaAluno = new FabricanteEstudante();
-        Usuario aluno = fabricaAluno.criarUsuario("Jane Doe", "jane.doe@example.com", "119bsi290", 123456);
+        Usuario aluno = fabricaAluno.criarUsuario("Jane Doe", "jane.doe@example.com", "119bsi290");
 
-        assertEquals("Aluno", aluno.getTipo());
+        assertEquals("Jane Doe", aluno.getNome());
+        assertEquals("jane.doe@example.com", aluno.getEmail());
+        assertTrue(aluno instanceof UsuarioEstudante);
+    }
 
-        aluno.editar("Jane Smith", "jane.smith@example.com", "119bsi290", 123456);
-        assertEquals("Jane Smith", ((UsuarioEstudante) aluno).getNome());
-        assertEquals("jane.smith@example.com", ((UsuarioEstudante) aluno).getEmail());
+    @Test
+    public void testCriarEditarExcluirAdministrador() {
+        FabricaDeUsuarios fabricaAdministrador = new FabricanteAdministrador();
+        Usuario administrador = fabricaAdministrador.criarUsuario("John Wick", "jown.wick@continental.com", "Daisy");
 
-        aluno.excluir("jane.smith@example.com");
+        assertEquals("John Wick", administrador.getNome());
+        assertEquals("jown.wick@continental.com", administrador.getEmail());
+        assertTrue(administrador instanceof UsuarioAdministrador);
     }
 
 }

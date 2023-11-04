@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.ufu.poo2.biblioteca.dto.UsuarioForm;
+import br.ufu.poo2.biblioteca.factory.FabricanteAdministrador;
+import br.ufu.poo2.biblioteca.factory.FabricanteEstudante;
+import br.ufu.poo2.biblioteca.factory.FabricanteProfessor;
 import br.ufu.poo2.biblioteca.model.Usuario;
-import br.ufu.poo2.biblioteca.model.UsuarioAdministrador;
-import br.ufu.poo2.biblioteca.model.UsuarioEstudante;
-import br.ufu.poo2.biblioteca.model.UsuarioProfessor;
 import br.ufu.poo2.biblioteca.service.UsuarioService;
 
 @Controller
@@ -29,11 +29,20 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Autowired
+    private FabricanteAdministrador fabricanteAdministrador;
+
+    @Autowired
+    private FabricanteEstudante fabricanteEstudante;
+
+    @Autowired
+    private FabricanteProfessor fabricanteProfessor;
+
     @GetMapping
     public String listarUsuarios(Model model) {
         List<Usuario> usuarios = usuarioService.listarUsuarios();
         model.addAttribute("usuarios", usuarios);
-        model.addAttribute("usuario", new UsuarioEstudante()); // This line adds an empty Usuario object to the model
+        model.addAttribute("usuario", fabricanteEstudante.criarUsuario(null, null, null)); // This line adds an empty Usuario object to the model
         model.addAttribute("isEdit", false);
 
         return "usuarios"; // The name of the Thymeleaf template
@@ -68,20 +77,18 @@ public class UsuarioController {
         Usuario usuario;
         switch (tipoUsuario) {
             case "Estudante":
-                usuario = new UsuarioEstudante();
+                usuario = fabricanteEstudante.criarUsuario(form.getNome(), form.getEmail(), form.getSenha());
                 break;
             case "Professor":
-                usuario = new UsuarioProfessor();
+                usuario = fabricanteProfessor.criarUsuario(form.getNome(), form.getEmail(), form.getSenha());
                 break;
             case "Administrador":
-                usuario = new UsuarioAdministrador();
+                usuario = fabricanteAdministrador.criarUsuario(form.getNome(), form.getEmail(), form.getSenha());
                 break;
             default:
                 throw new IllegalArgumentException("Tipo de usuário inválido");
         }
         usuario.setId(form.getId());
-        usuario.setNome(form.getNome());
-        usuario.setEmail(form.getEmail());
 
         usuarioService.saveUsuario(usuario);
 

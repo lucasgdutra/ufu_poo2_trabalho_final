@@ -1,8 +1,17 @@
 package br.ufu.poo2.biblioteca.factory;
 
-public class FabricanteProfessor implements FabricaDeUsuarios{
+import org.springframework.stereotype.Component;
+
+import br.ufu.poo2.biblioteca.model.UsuarioProfessor;
+
+@Component
+public class FabricanteProfessor implements FabricaDeUsuarios {
     @Override
-    public Usuario criarUsuario(String nome, String email, String matricula, int senha) {
-        return new UsuarioProfessor(nome, email, matricula, senha);
+    public UsuarioProfessor criarUsuario(String nome, String email, String senha) {
+        UsuarioProfessor usuario = new UsuarioProfessor();
+        usuario.setNome(nome);
+        usuario.setEmail(email);
+        usuario.setSenha(senha);
+        return usuario;
     }
 }
