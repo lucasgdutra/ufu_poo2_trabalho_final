@@ -68,7 +68,9 @@ public class EmprestimoController {
         }
 
         model.addAttribute("emprestimos", emprestimos);
-        Emprestimo emprestimo = new EmprestimoEstudante();
+        Emprestimo emprestimo = new EmprestimoEstudante(); // Classe base abstrata não pode ser instanciada, então
+                                                           // instanciamos uma classe filha, não faz diferença pois a
+                                                           // intancia não possui valores
         emprestimo.setUsuario(fabricanteEstudante.criarUsuario(null, null, null));
         Livro livro = new Livro();
         emprestimo.setLivro(livro);
@@ -153,9 +155,39 @@ public class EmprestimoController {
     }
 
     @GetMapping("/emprestar/livro/{id}")
-    public String emprestarLivro(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String emprestarLivro(@PathVariable Long id, RedirectAttributes redirectAttributes,
+            Authentication authentication) {
         Livro livro = livroService.findById(id);
-        Emprestimo emprestimo = new EmprestimoEstudante();
+
+        String tipoEmprestimo = null;
+        if (authentication != null) {
+            for (GrantedAuthority authority : authentication.getAuthorities()) {
+                String role = authority.getAuthority();
+                if (role.equals("ROLE_Estudante")) {
+                    tipoEmprestimo = "Estudante";
+                } else if (role.equals("ROLE_Professor")) {
+                    tipoEmprestimo = "Professor";
+                } else if (role.equals("ROLE_Administrador")) {
+                    tipoEmprestimo = "Professor"; // administradores emprestam como professores
+                }
+            }
+        }
+        if (tipoEmprestimo == null) {
+            redirectAttributes.addFlashAttribute("message", "Você não tem permissão para emprestar livros!");
+            return "redirect:/livros";
+        }
+        Emprestimo emprestimo;
+        switch (tipoEmprestimo) {
+            case "Estudante":
+                emprestimo = new EmprestimoEstudante();
+                break;
+            case "Professor":
+                emprestimo = new EmprestimoProfessor();
+                break;
+            default:
+                throw new IllegalArgumentException("Tipo de emprestimo inválido");
+        }
+
         emprestimo.setUsuario(
                 usuarioService.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()));
         emprestimo.setLivro(livro);
