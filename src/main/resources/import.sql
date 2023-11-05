@@ -1,6 +1,14 @@
 -- src/main/resources/import.sql
 INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (1, '1984',                  'George Orwell', 'Secker and Warburg',    1949,  10, 8, '1234567890');
 INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (2, 'To Kill a Mockingbird', 'Harper Lee',    'J.B. Lippincott & Co.', 1960,   8, 6, '1234567891');
+INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (3, 'Maze Runner', 'James Dashner',                   'Plataforma 21', 2009,   6, 6, '1234567892');
+INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (4, 'Harry Potter', 'J.K. Rowling',                           'Rocco', 2001,   3, 2, '1234567893');
+INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (5, 'Investimentos Inteligentes ', 'Gustavo Cervasi',      'Sextante', 2019,   4, 2, '1234567894');
+INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (6, 'A Historia Da Economia', 'Globo Livros',                 'Globo', 2012,   4, 2, '1234567895');
+INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (7, 'Five Nigts at Freddys-Olhos Prateados', 'C.Scott',  'Intrinseca', 2017,   5, 5, '1234567896');
+INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (8, 'Five Nigts at Freddys-Os Distorcidos', 'C.Scott',   'Intrinseca', 2018,   5, 5, '1234567897');
+INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (9, 'Pequeno Principe', 'Antoine de Saint',             'Via Leitura', 2015,   3, 2, '1234567898');
+INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (10, 'Quincas Borba', 'Machado de Assis ',                 'Itatiaia', 2023,   2, 2, '1234567899');
 
 ALTER TABLE livro ALTER COLUMN id RESTART WITH (SELECT MAX(id) FROM livro) + 1;
 
