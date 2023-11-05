@@ -17,12 +17,23 @@ public class Livro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String ISBN;
     private String titulo;
     private String autor;
     private String editora;
     private int ano;
-    private boolean disponivel;
-    private int quantidade;
-    private String ISBN;
+    private int quantidadeTotal;
+    private int quantidadeDisponivel;
+
+    public void Emprestar() {
+        if (quantidadeDisponivel <= 0) {
+            throw new IllegalArgumentException("Não há livros disponíveis");
+        }
+        quantidadeDisponivel--;
+    }
+
+    public void Devolver() {
+        quantidadeDisponivel++;
+    }
 
 }

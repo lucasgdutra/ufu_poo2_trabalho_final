@@ -30,4 +30,8 @@ public class EmprestimoService {
     public void saveEmprestimo(Emprestimo emprestimo) {
         emprestimoRepository.save(emprestimo);
     }
+
+    public List<Emprestimo> listarEmprestimosPorUsuario(Long id) {
+        return emprestimoRepository.findByUsuarioId(id);
+    }
 }

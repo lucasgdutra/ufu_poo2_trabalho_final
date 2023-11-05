@@ -7,6 +7,8 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,15 +19,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import br.ufu.poo2.biblioteca.decorator.CalculaPagamentoDecorator;
+import br.ufu.poo2.biblioteca.decorator.MultaDecorator;
 import br.ufu.poo2.biblioteca.dto.EmprestimoForm;
 import br.ufu.poo2.biblioteca.factory.FabricanteEstudante;
 import br.ufu.poo2.biblioteca.model.Emprestimo;
 import br.ufu.poo2.biblioteca.model.EmprestimoEstudante;
 import br.ufu.poo2.biblioteca.model.EmprestimoProfessor;
 import br.ufu.poo2.biblioteca.model.Livro;
+import br.ufu.poo2.biblioteca.model.Multa;
+import br.ufu.poo2.biblioteca.model.TipoUsuario;
 import br.ufu.poo2.biblioteca.model.Usuario;
 import br.ufu.poo2.biblioteca.service.EmprestimoService;
 import br.ufu.poo2.biblioteca.service.LivroService;
+import br.ufu.poo2.biblioteca.service.MultaService;
 import br.ufu.poo2.biblioteca.service.UsuarioService;
 
 @Controller
@@ -33,6 +40,9 @@ import br.ufu.poo2.biblioteca.service.UsuarioService;
 public class EmprestimoController {
     @Autowired
     private EmprestimoService emprestimoService;
+
+    @Autowired
+    private MultaService multaService;
 
     @Autowired
     private UsuarioService usuarioService;
@@ -45,7 +55,18 @@ public class EmprestimoController {
 
     @GetMapping
     public String listarEmprestimos(Model model) {
-        List<Emprestimo> emprestimos = emprestimoService.listarEmprestimos();
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername(); // get the username of the logged-in user
+
+        Usuario usuario = usuarioService.findByEmail(username);
+
+        List<Emprestimo> emprestimos;
+        if (usuario.getTipoUsuario().equals(TipoUsuario.Administrador)) {
+            emprestimos = emprestimoService.listarEmprestimos();
+        } else {
+            emprestimos = emprestimoService.listarEmprestimosPorUsuario(usuario.getId());
+        }
+
         model.addAttribute("emprestimos", emprestimos);
         Emprestimo emprestimo = new EmprestimoEstudante();
         emprestimo.setUsuario(fabricanteEstudante.criarUsuario(null, null, null));
@@ -81,11 +102,6 @@ public class EmprestimoController {
             @Valid @ModelAttribute("emprestimo") EmprestimoForm form, Authentication authentication,
             BindingResult result,
             RedirectAttributes redirectAttributes) {
-        System.out.println("Tipo de emprestimo: " + form.getTipoEmprestimo());
-        System.out.println("Usuario: " + form.getUsuarioId());
-        System.out.println("Livro: " + form.getLivroId());
-        System.out.println("Data de emprestimo: " + form.getDataEmprestimo());
-        System.out.println("Data de devolucao: " + form.getDataDevolucao());
 
         String tipoEmprestimo = form.getTipoEmprestimo();
 
@@ -136,18 +152,63 @@ public class EmprestimoController {
         return "redirect:/emprestimos";
     }
 
-    // @ModelAttribute
-    // public void resolveUsuario(@RequestParam(value = "usuarioType", required =
-    // false) String usuarioType, Model model) {
-    // Usuario usuario = null;
-    // if ("Professor".equalsIgnoreCase(usuarioType)) {
-    // usuario = fabricanteProfessor.criarUsuario(null, null, null);
-    // } else if ("Estudante".equalsIgnoreCase(usuarioType)) {
-    // usuario = fabricanteEstudante.criarUsuario(null, null, null);
-    // } else if ("Administrador".equalsIgnoreCase(usuarioType)) {
-    // usuario = fabricanteAdministrador.criarUsuario(null, null, null);
-    // }
-    // model.addAttribute("usuario", usuario); // This line adds a resolved Usuario
-    // object to the model
-    // }
+    @GetMapping("/emprestar/livro/{id}")
+    public String emprestarLivro(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        Livro livro = livroService.findById(id);
+        Emprestimo emprestimo = new EmprestimoEstudante();
+        emprestimo.setUsuario(
+                usuarioService.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()));
+        emprestimo.setLivro(livro);
+        emprestimo.defineDatas();
+        try {
+            emprestimo.rotinaEmprestimo();
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", e.getMessage());
+            return "redirect:/livros";
+        }
+        livroService.saveLivro(livro);
+        emprestimoService.saveEmprestimo(emprestimo);
+
+        redirectAttributes.addFlashAttribute("message", "Livro emprestado com sucesso!");
+
+        return "redirect:/emprestimos";
+    }
+
+    @GetMapping("/devolver/{id}")
+    public String devolverLivro(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+
+        Emprestimo emprestimo = emprestimoService.findById(id);
+
+        CalculaPagamentoDecorator calculaPagamento = emprestimo;
+
+        emprestimo.rotinaDevolucao();
+        Livro livro = emprestimo.getLivro();
+
+        livroService.saveLivro(livro);
+        emprestimoService.deleteEmprestimo(emprestimo);
+
+        Long dias_atraso = emprestimo.getDiasAtraso();
+        if (dias_atraso > 0) {
+            calculaPagamento = new MultaDecorator(emprestimo, dias_atraso.intValue());
+        }
+
+        if (calculaPagamento.calcularPagamento() > 0) {
+            Multa multa = new Multa(calculaPagamento.calcularPagamento());
+            multa.setUsuario(emprestimo.getUsuario());
+            multa.setLivro(emprestimo.getLivro());
+            multa.setDataEmprestimo(emprestimo.getDataEmprestimo());
+            multa.setDataDevolucao(emprestimo.getDataDevolucao());
+
+            multaService.saveMulta(multa);
+
+            redirectAttributes.addFlashAttribute("message",
+                    "Livro devolvido, multa gerada no valor de: R$ " + calculaPagamento.calcularPagamento()
+                            + " por atraso na devolução!");
+            return "redirect:/multas";
+        }
+
+        redirectAttributes.addFlashAttribute("message", "Livro devolvido com sucesso!");
+
+        return "redirect:/emprestimos";
+    }
 }

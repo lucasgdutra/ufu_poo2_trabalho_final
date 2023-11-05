@@ -1,16 +1,25 @@
 package br.ufu.poo2.biblioteca.decorator;
 
-import br.ufu.poo2.biblioteca.strategy.PagamentoStrategy;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
-public class MultaDecorator extends PagamentoDecorator {
-    public MultaDecorator(PagamentoStrategy pagamentoStrategy) {
-        super(pagamentoStrategy);
+import br.ufu.poo2.biblioteca.model.Emprestimo;
+
+public class MultaDecorator implements CalculaPagamentoDecorator {
+    private Emprestimo emprestimo;
+    private int diasAtraso;
+
+    public MultaDecorator(Emprestimo emprestimo, int diasAtraso) {
+        this.emprestimo = emprestimo;
+        this.diasAtraso = diasAtraso;
     }
 
-    @Override
-    public float calcularPagamento(int diasAtraso) {
-        float pagamentoBase = pagamentoStrategy.calcularPagamento(diasAtraso);
-        return pagamentoBase + 1.5f + (0.05f * diasAtraso);
+    public float calcularPagamento() {
+        float valorBase = emprestimo.calcularPagamento();
+        float novoValor = valorBase + 1.5f + (0.05f * diasAtraso);
+        float rounded = new BigDecimal(novoValor).setScale(2, RoundingMode.HALF_EVEN).floatValue();
+        return rounded;
+
     }
 
 }

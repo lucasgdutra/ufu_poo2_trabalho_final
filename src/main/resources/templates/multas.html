@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <nav th:replace="~{fragments :: navbar}"></nav>
+    <div class="container mt-3">
+        <p th:text="${message}" th:if="${message}" class="alert alert-info">Message goes here</p>
+        <p th:text="${error}" th:if="${error}" class="alert alert-danger">Message goes here</p>
+        <h2 class="mt-5">Lista de Multas</h2>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Livro</th>
+                    <th>Valor</th>
+                    <th>Data Emprestimo</th>
+                    <th>Data Devolução</th>
+                    <th>Data Geração Multa</th>
+
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Loop through the list of Multas -->
+                <tr th:each="multa : ${multas}">
+                    <td th:text="${multa.id}">ID</td>
+                    <td th:text="${multa.usuario.nome}">Usuario</td>
+                    <td th:text="${multa.livro.titulo}">Livro</td>
+                    <td th:text="${#numbers.formatCurrency(multa.valor)}">Valor</td>
+                    <td th:text="${multa.dataEmprestimo}">Data</td>
+                    <td th:text="${multa.dataDevolucao}">Data</td>
+                    <td th:text="${multa.dataMulta}">Data</td>
+
+                    <td>
+                        <form th:action="@{/multas/pagar/{id}(id=${multa.id})}" method="post" class="d-flex">
+                            <select name="pagamentoStrategy" class="form-select" required>
+                                <option value="" disabled selected>Selecione uma forma de pagamento</option>
+                                <option th:each="tipo : ${tiposPagamento}" th:value="${tipo}" th:text="${tipo}">
+                                </option>
+                            </select>
+                            <button type="submit" class="btn btn-success btn-sm">Pagar</button>
+                        </form>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+
+    <script>
+        history.pushState({}, "", "/multas");
+    </script>
+</body>
+
+</html>

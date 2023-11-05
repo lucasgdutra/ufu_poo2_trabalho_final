@@ -1,6 +1,6 @@
 -- src/main/resources/import.sql
-INSERT INTO livro (titulo, autor, editora, ano, disponivel, quantidade, isbn) VALUES ('1984', 'George Orwell', 'Secker and Warburg', 1949, true, 10, '1234567890');
-INSERT INTO livro (titulo, autor, editora, ano, disponivel, quantidade, isbn) VALUES ('To Kill a Mockingbird', 'Harper Lee', 'J.B. Lippincott & Co.', 1960, true, 8, '1234567891');
+INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (1, '1984',                  'George Orwell', 'Secker and Warburg',    1949,  10, 8, '1234567890');
+INSERT INTO livro (id, titulo, autor, editora, ano,  quantidade_total, quantidade_disponivel, isbn) VALUES (2, 'To Kill a Mockingbird', 'Harper Lee',    'J.B. Lippincott & Co.', 1960,   8, 6, '1234567891');
 
 ALTER TABLE livro ALTER COLUMN id RESTART WITH (SELECT MAX(id) FROM livro) + 1;
 

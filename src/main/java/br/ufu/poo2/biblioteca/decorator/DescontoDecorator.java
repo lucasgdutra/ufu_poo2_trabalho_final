@@ -1,15 +1,18 @@
 package br.ufu.poo2.biblioteca.decorator;
 
-import br.ufu.poo2.biblioteca.strategy.PagamentoStrategy;
+import br.ufu.poo2.biblioteca.model.Emprestimo;
 
-public class DescontoDecorator extends PagamentoDecorator {
-    public DescontoDecorator(PagamentoStrategy pagamentoStrategy) {
-        super(pagamentoStrategy);
+
+public class DescontoDecorator {
+    private Emprestimo emprestimo;
+
+    public DescontoDecorator(Emprestimo emprestimo) {
+        this.emprestimo = emprestimo;
+
     }
 
-    @Override
-    public float calcularPagamento(int diasAtraso) {
-        float pagamentoBase = pagamentoStrategy.calcularPagamento(diasAtraso);
-        return pagamentoBase - (pagamentoBase * 0.1f);
+    public float calcularPagamento() {
+        float pagamentoBase = emprestimo.calcularPagamento();
+        return pagamentoBase - (0.1f * pagamentoBase);
     }
 }

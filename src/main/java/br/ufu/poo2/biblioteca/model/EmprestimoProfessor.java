@@ -1,23 +1,20 @@
 package br.ufu.poo2.biblioteca.model;
 
-import br.ufu.poo2.biblioteca.decorator.DescontoDecorator;
-import br.ufu.poo2.biblioteca.strategy.PagamentoStrategy;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("Professor")
 public class EmprestimoProfessor extends Emprestimo {
+    private final Long SEIS_MESES = 15552000000L;
+
     public EmprestimoProfessor() {
         super();
     }
 
     @Override
-    public float calcularPagamento(int diasAtraso) {
-        return super.calcularPagamento(diasAtraso);
-    }
-
-    public void setPagamentoStrategy(PagamentoStrategy pagamentoStrategy) {
-        this.pagamentoStrategy = new DescontoDecorator(pagamentoStrategy);
+    public void defineDatas() {
+        setDataEmprestimo(new java.util.Date());
+        setDataDevolucao(new java.util.Date(getDataEmprestimo().getTime() + SEIS_MESES));
     }
 }

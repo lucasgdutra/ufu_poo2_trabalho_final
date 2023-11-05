@@ -45,4 +45,12 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
+    public Usuario findByEmail(String username) {
+        List<Usuario> usuarios = usuarioRepository.findByEmail(username);
+        if (usuarios.isEmpty()) {
+            return null;
+        }
+        return usuarios.get(0);
+    }
+
 }

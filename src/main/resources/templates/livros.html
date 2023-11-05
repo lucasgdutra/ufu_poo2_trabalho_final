@@ -45,20 +45,22 @@
                                     <label for="ano" class="form-label">Ano</label>
                                     <input type="number" class="form-control" id="ano" th:field="*{ano}" required>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="quantidade" class="form-label">Quantidade</label>
-                                    <input type="number" class="form-control" id="quantidade" th:field="*{quantidade}"
-                                        required>
-                                </div>
+
                                 <div class="mb-3">
                                     <label for="ISBN" class="form-label">ISBN</label>
                                     <input type="text" class="form-control" id="ISBN" th:field="*{ISBN}" required>
                                 </div>
-                                <div class="mb-3 form-check">
-                                    <input type="checkbox" class="form-check-input" id="disponivel"
-                                        th:field="*{disponivel}">
-                                    <label class="form-check-label" for="disponivel">Disponível</label>
+                                <div class="mb-3">
+                                    <label for="quantidadeDisponivel" class="form-label">Quantidade Disponível</label>
+                                    <input type="number" class="form-control" id="quantidadeDisponivel"
+                                        th:field="*{quantidadeDisponivel}" required>
                                 </div>
+                                <div class="mb-3">
+                                    <label for="quantidadeTotal" class="form-label">Quantidade Total</label>
+                                    <input type="number" class="form-control" id="quantidadeTotal"
+                                        th:field="*{quantidadeTotal}" required>
+                                </div>
+
                                 <button type="submit" class="btn btn-primary"
                                     th:text="${isEdit} ? 'Editar' : 'Adicionar'">Adicionar</button>
                             </form>
@@ -75,9 +77,9 @@
                     <th>Autor</th>
                     <th>Editora</th>
                     <th>Ano</th>
-                    <th>Quantidade</th>
                     <th>ISBN</th>
-                    <th>Disponivel</th>
+                    <th>Quantidade Disponível</th>
+                    <th>Quantidade Total</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -89,14 +91,16 @@
                     <td th:text="${livro.autor}">Author</td>
                     <td th:text="${livro.editora}">Publisher</td>
                     <td th:text="${livro.ano}">Year</td>
-                    <td th:text="${livro.quantidade}">Quantity</td>
                     <td th:text="${livro.ISBN}">ISBN</td>
-                    <td th:text="${livro.disponivel ? 'Sim' : 'Não'}">Available</td>
+                    <td th:text="${livro.quantidadeDisponivel}">0</td>
+                    <td th:text="${livro.quantidadeTotal}">0</td>
                     <td>
-                        <a th:href="@{/livros/edit/{id}(id=${livro.id})}" sec:authorize="hasRole('ROLE_Administrador')" class="btn btn-success btn-sm">Editar</a>
-                        <a th:href="@{/livros/delete/{id}(id=${livro.id})}" sec:authorize="hasRole('ROLE_Administrador')" class="btn btn-danger btn-sm">Deletar</a>
-                        <a th:href="@{/livros/reservar/{id}(id=${livro.id})}"
-                            class="btn btn-warning btn-sm">Reservar</a>
+                        <a th:href="@{/livros/edit/{id}(id=${livro.id})}" sec:authorize="hasRole('ROLE_Administrador')"
+                            class="btn btn-success btn-sm">Editar</a>
+                        <a th:href="@{/livros/delete/{id}(id=${livro.id})}"
+                            sec:authorize="hasRole('ROLE_Administrador')" class="btn btn-danger btn-sm">Deletar</a>
+                        <a th:href="@{/emprestimos/emprestar/livro/{id}(id=${livro.id})}"
+                            class="btn btn-warning btn-sm">Emprestar</a>
                     </td>
                 </tr>
             </tbody>

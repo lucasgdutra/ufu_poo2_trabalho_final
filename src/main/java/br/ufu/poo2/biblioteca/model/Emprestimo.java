@@ -7,7 +7,7 @@ import lombok.Setter;
 
 import java.util.Date;
 
-import br.ufu.poo2.biblioteca.strategy.PagamentoStrategy;
+import br.ufu.poo2.biblioteca.decorator.CalculaPagamentoDecorator;
 
 @NoArgsConstructor
 @Getter
@@ -15,7 +15,7 @@ import br.ufu.poo2.biblioteca.strategy.PagamentoStrategy;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_emprestimo", discriminatorType = DiscriminatorType.STRING)
-public abstract class Emprestimo {
+public abstract class Emprestimo implements CalculaPagamentoDecorator {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,10 +34,26 @@ public abstract class Emprestimo {
     @Temporal(TemporalType.DATE)
     private Date dataDevolucao;
 
-    @Transient
-    protected PagamentoStrategy pagamentoStrategy;
+    public float calcularPagamento() {
+        return 0;
+    }
 
-    public float calcularPagamento(int diasAtraso) {
-        return pagamentoStrategy.calcularPagamento(diasAtraso);
+    public final void rotinaEmprestimo() {
+        livro.Emprestar();
+        defineDatas();
+    }
+
+    public final void rotinaDevolucao() {
+        livro.Devolver();
+    }
+
+    public abstract void defineDatas();
+
+    public Long getDiasAtraso() {
+        Date hoje = new Date();
+        if (hoje.after(dataDevolucao)) {
+            return (hoje.getTime() - dataDevolucao.getTime()) / (1000 * 60 * 60 * 24);
+        }
+        return 0L;
     }
 }
