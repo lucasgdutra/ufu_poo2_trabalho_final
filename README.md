@@ -1,6 +1,6 @@
 # Sistema de Gerenciamento de Biblioteca
 
-![Logo](caminho-para-a-imagem-do-logo.png)
+![Logo](docs/icone-do-projeto.png)
 
 ## Introdução (Home)
 
