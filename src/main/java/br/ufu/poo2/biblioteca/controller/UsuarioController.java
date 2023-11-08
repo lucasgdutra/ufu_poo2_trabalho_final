@@ -42,7 +42,9 @@ public class UsuarioController {
     public String listarUsuarios(Model model) {
         List<Usuario> usuarios = usuarioService.listarUsuarios();
         model.addAttribute("usuarios", usuarios);
-        model.addAttribute("usuario", fabricanteEstudante.criarUsuario(null, null, null)); // This line adds an empty Usuario object to the model
+        model.addAttribute("usuario", fabricanteEstudante.criarUsuario(null, null, null)); // This line adds an empty
+                                                                                           // Usuario object to the
+                                                                                           // model
         model.addAttribute("isEdit", false);
 
         return "usuarios"; // The name of the Thymeleaf template
@@ -60,8 +62,15 @@ public class UsuarioController {
 
     @GetMapping("/delete/{id}")
     public String deletarUsuario(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        Usuario usuario = usuarioService.findById(id);
-        usuarioService.deleteUsuario(usuario);
+        try {
+            Usuario usuario = usuarioService.findById(id);
+            usuarioService.deleteUsuario(usuario);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message",
+                    "Erro ao deletar usuários, verifique se existem emprestimos ou multas pendentes");
+            return "redirect:/usuarios";
+        }
+
         redirectAttributes.addFlashAttribute("message", "Usuário deletado com sucesso!");
         return "redirect:/usuarios";
     }

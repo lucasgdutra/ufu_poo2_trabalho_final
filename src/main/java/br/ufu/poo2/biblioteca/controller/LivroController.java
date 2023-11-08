@@ -44,8 +44,14 @@ public class LivroController {
 
     @GetMapping("/delete/{id}")
     public String deletarLivro(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
         Livro livro = livroService.findById(id);
-        livroService.deleteLivro(livro);
+        livroService.deleteLivro(livro);    
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", "Erro ao deletar livro, verifique se existem emprestimos ou multas pendentes");
+            return "redirect:/livros";
+        }
+        
         redirectAttributes.addFlashAttribute("message", "Livro deletado com sucesso!");
         return "redirect:/livros";
     }
