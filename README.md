@@ -9,7 +9,7 @@ Este sistema foi desenvolvido para gerenciar as operações cotidianas de uma bi
 ### Tela do Admin
 
 Na Tela inicial (Livros), na visão do administrador.
-Observe que o Administrador tem 2 opções a mais que um usuário comum, que é a opção de Editar (Onde o Admin pode alterar Qualquer informação do Livro em especifico), é a opção Deletar (Onde o Admin pode deletar aquele Livro em especifico).
+Observe que o Administrador tem 2 opções a mais que um usuário comum, que é a opção de Editar (Onde o Admin pode alterar Qualquer einformação do Livro em especifico), e a opção Deletar (Onde o Admin pode deletar aquele Livro em especifico).
 ![Tela de Livros](docs/Admin-Tela-Livros.png)
 
 Aqui observamos detalhadamente, a visao de como é feita a alteração do Livro, quando clicamos na opção de Editar, em um Livro em especifico, monstra todos os detalhes dele, e que pode-se alterar qualquer informação deste Livro.
@@ -22,13 +22,13 @@ Observe que o Administrador tem 2 opções a mais que um usuário comum, que é 
 Aqui observamos detalhadamente, a visao de como é feita a alteração dos emprestimos, informação que pode ser alterada quando a opção de Editar e acionada.
 ![Tela de Empréstimo](docs/Admin-Tela-Emprestimo-Editar.png)
 
-Na Tela de Multas, na visão do Administrador não tem muitas diferenças do que na visão do usuario comum, porém na visão do administrador, mostra as multas de TODOS os Usuario, no caso da visão do usuario mostra apenas a multa dele, caso tenha alguma multa.
+Na Tela de Multas, na visão do Administrador não tem muitas diferenças do que na visão do usuario comum, porém na visão do administrador, mostra as multas de TODOS os Usuarios, no caso da visão do usuario mostra apenas a multa dele, caso tenha alguma multa.
 ![Tela de Multas](docs/Admin-Tela-Multas.png)
 
-Aqui mostra as opção que pode ser selecionadas para pagar a multa.
+Aqui mostra as opções que podem ser selecionadas para pagar a multa. Definimos de forma proposital que o método Pix retorne um erro, para demonstração do funcionamento do padrão Strategy.
 ![Tela de Multas](docs/Admin-Tela-Multas-Opcoes.png)
 
-Quando logado no admin, em sua visao quando clicado em seu nome de usuario, ele demonsta uma opção a mais que um usuario comum que e a opção de Usuarios, em que nesta opção mostra TODOS os usuario registrado.
+Quando logado no admin, em sua visao quando clicado em seu nome de usuario, ele demonsta uma opção a mais que um usuario comum que é a opção de Usuarios, em que nesta opção mostra TODOS os usuarios registrado.
 ![Tela de Usuários](docs/Admin-Tela-Opcao-Pra-Ver-Usuarios.png)
 
 Na Tela Usuarios, que e uma janela unica do admin, mostra todos os usuarios registrado, o admin tem 2 opções em cada usuario, em que uma delas e o Editar onde o admin pode alterar qualquer informações do usuario, é o Deletar onde o admin pode excluir o usuario.
@@ -76,40 +76,86 @@ Aqui vemos as consultas dos Usuario
 ## Padrões de Projeto
 
 ### Singleton
-Aplicado na classe `BibliotecaService` para garantir uma única instância desta classe durante toda a execução do sistema, proporcionando um ponto global de acesso a este objeto. O Singleton é um padrão de projeto de software que garante que uma classe tenha apenas uma instância e fornece um ponto de acesso global a essa instância. Isso é útil quando você deseja ter um único ponto de controle para uma determinada funcionalidade ou recurso.
+É aplicado por padrão no framework Spring, onde todas as beans são criadas e gerenciadas como singletons.
 
-```java
-public class BibliotecaService {
-    private static BibliotecaService instance;
-    
-    private BibliotecaService() { }
-    
-    public static synchronized BibliotecaService getInstance() {
-        if (instance == null) {
-            instance = new BibliotecaService();
-        }
-        return instance;
-    }
-}
-```
+O Singleton é um padrão de projeto de software que garante que uma classe tenha apenas uma instância e fornece um ponto de acesso global a essa instância. Isso é útil quando você deseja ter um único ponto de controle para uma determinada funcionalidade ou recurso.
+
+![Lista de beans](docs/beans.png)
 
 ### Factory
-Utilizado para criar objetos de `Usuario` e `Emprestimo` de forma encapsulada, permitindo a criação de diferentes tipos de usuários e empréstimos baseado nas regras de negócio. O padrão Factory é um padrão de criação que fornece uma interface para criar objetos em uma superclasse, mas permite que as subclasses decidam qual classe concreta criar. Isso promove o princípio de abstração e encapsulamento, tornando o código mais flexível e menos acoplado.
+Utilizado para criar instancias de `Usuario` de forma encapsulada, permitindo a criação de diferentes tipos de usuários baseado nas regras de negócio. O padrão Factory é um padrão de criação que fornece uma interface para criar objetos em uma superclasse, mas permite que as subclasses decidam qual classe concreta criar. Isso promove o princípio de abstração e encapsulamento, tornando o código mais flexível e menos acoplado.
 
 ```java
-public abstract class FabricaDeUsuario {
-    public abstract Usuario criarUsuario(String nome, String email, String senha);
+package br.ufu.poo2.biblioteca.factory;
+
+import org.springframework.stereotype.Component;
+
+import br.ufu.poo2.biblioteca.model.UsuarioEstudante;
+
+@Component
+public class FabricanteEstudante implements FabricaDeUsuarios {
+    @Override
+    public UsuarioEstudante criarUsuario(String nome, String email, String senha) {
+        UsuarioEstudante usuario = new UsuarioEstudante();
+        usuario.setNome(nome);
+        usuario.setEmail(email);
+        usuario.setSenha(senha);
+        return usuario;
+    }
 }
 ```
 
 ### Decorator
 Usado para aplicar a multa ou desconto no pagamento do emprestimo do livro. O padrão Decorator é um padrão estrutural que permite adicionar comportamento adicional a objetos existentes dinamicamente, sem modificar sua estrutura. Isso é alcançado por meio da composição de objetos em uma cadeia, onde cada objeto decora o próximo.
 
+```java
+package br.ufu.poo2.biblioteca.decorator;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import br.ufu.poo2.biblioteca.model.Emprestimo;
+
+public class MultaDecorator implements CalculaPagamentoDecorator {
+    private Emprestimo emprestimo;
+    private int diasAtraso;
+
+    public MultaDecorator(Emprestimo emprestimo, int diasAtraso) {
+        this.emprestimo = emprestimo;
+        this.diasAtraso = diasAtraso;
+    }
+
+    public float calcularPagamento() {
+        float valorBase = emprestimo.calcularPagamento();
+        float novoValor = valorBase + 1.5f + (0.05f * diasAtraso);
+        float rounded = new BigDecimal(novoValor).setScale(2, RoundingMode.HALF_EVEN).floatValue();
+        return rounded;
+
+    }
+
+}
+
+```
+
 ### Proxy
-Usado no pacote security, no processo de autenticação do usuário. O padrão Proxy é um padrão estrutural que atua como um substituto para outro objeto para controlar o acesso a ele. É útil em situações em que você deseja adicionar comportamento adicional, como controle de acesso, a um objeto existente.
+Usado no pacote security, no processo de autenticação e segurança. O proxy intercepta as requisições e controla o acesso a aplicação. O padrão Proxy é um padrão estrutural que atua como um substituto para outro objeto para controlar o acesso a ele. É útil em situações em que você deseja adicionar comportamento adicional, como controle de acesso, a um objeto existente.
 
 ### Strategy
 Usado para definir o tipo de pagamento do emprestimo do livro (Pix, Cartão, Boleto). O padrão Strategy é um padrão comportamental que define uma família de algoritmos, encapsula cada um deles e os torna intercambiáveis. Isso permite que o cliente escolha o algoritmo a ser usado em tempo de execução.
+
+```java
+package br.ufu.poo2.biblioteca.strategy;
+
+public class PagamentoBoleto implements PagamentoStrategy {
+
+    @Override
+    public boolean realizarPagamento(double valor) {
+        return true;
+    }
+
+}
+
+```
 
 ### Template
 Usado na classe de Emprestimo. O padrão Template é um padrão comportamental que define a estrutura de um algoritmo, permitindo que partes específicas desse algoritmo sejam implementadas por subclasses. Isso promove a reutilização de código e permite que as subclasses personalizem o comportamento conforme necessário.
@@ -140,16 +186,17 @@ public abstract class Emprestimo {
 ### Inversão de dependência
 Princípio gerado automaticamente pelo Spring. A inversão de dependência é um princípio que afirma que as classes de alto nível não devem depender das classes de baixo nível, mas ambas devem depender de abstrações. Isso promove a flexibilidade e a capacidade de alterar as implementações sem afetar as classes de alto nível.
 
-## Framework (Opcional)
+### Lei de Demeter
+O sistema foi construido em camadas de forma que cada método só acesse os atributos e métodos de sua própria classe ou de classes em uma camada vizinha
+
+> Usuário <-> Controller <-> Service <-> Repository
+
+## Framework
 Um framework é um conjunto de bibliotecas, padrões e diretrizes que fornecem uma estrutura para desenvolver software. Ele geralmente inclui funcionalidades comuns e abstrações que facilitam o desenvolvimento de aplicativos e sistemas, economizando tempo e esforço dos desenvolvedores. Frameworks podem ser usados para criar aplicativos web, aplicativos móveis, jogos, entre outros.
 
 ### Spring Framework
-Optamos pelo Spring Framework devido à sua vasta comunidade, documentação robusta e facilidade de integração com outras tecnologias. Ele é utilizado extensivamente ao longo do projeto, por exemplo, na injeção de dependências.
+Optamos pelo Spring Framework devido à sua vasta comunidade, documentação robusta e facilidade de integração com outras tecnologias. 
 
-```java
-@Autowired
-private UsuarioService usuarioService;
-```
 
 - **Vantagens**: Facilita a configuração e a modularidade do projeto, além de proporcionar uma vasta gama de funcionalidades através de seus módulos, garante a inversão de dependência dentro do projeto.
 
